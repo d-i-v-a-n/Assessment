@@ -1,10 +1,12 @@
 using Application;
 using Domain;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Presentation;
 using Serilog;
+using WebApi.Configuration;
 
 namespace WebApi;
 
@@ -44,16 +46,26 @@ public class Program
             });
         });
 
-        builder.Services.AddIdentityApiEndpoints<User>().AddEntityFrameworkStores<ApplicationDbContext>();
+
 
         //builder.Services
-        //    .AddIdentityCore<User>()
-        //    .AddApiEndpoints()
+        //    .AddIdentity<User, IdentityRole>()
+        //    .AddDefaultTokenProviders()
+        //    .AddDefaultUI()
+        //    .AddRoles<IdentityRole>()
         //    .AddEntityFrameworkStores<ApplicationDbContext>();
-        //builder.Services
-        //    .AddIdentityApiEndpoints<User>();
 
-        builder.Services.AddAuthorization();
+        //builder.Services.AddIdentity<User, IdentityRole>().AddRoles<IdentityRole>();
+
+        //builder.Services.AddDefaultIdentity<User>().AddRoles<IdentityRole>();
+
+        builder.Services
+            .AddIdentityApiEndpoints<User>()
+            //.AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+
 
         builder.Services.AddTransient<IAuthenticated>(provider =>
         {
@@ -79,10 +91,17 @@ public class Program
             .AddPersistence()
             .AddPresentation();
 
+        
+
         builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
+        builder.Services
+            .AddAuthorization()
+            .AddAuthentication();
 
         var app = builder.Build();
+
+        
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -90,6 +109,8 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+
+        app.CreateUsersAndRoles().Wait();
 
         app.UseSerilogRequestLogging();
 
