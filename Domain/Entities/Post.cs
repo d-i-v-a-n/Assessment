@@ -1,8 +1,5 @@
 ﻿namespace Domain.Entities;
 
-using Microsoft.AspNetCore.Identity;
-
-
 //[EntityTypeConfiguration(typeof(PostConfiguration))]
 public class Post
 {
@@ -12,101 +9,71 @@ public class Post
     public int LikeCount { get; private set; } = 0;
 
     public string UserId { get; private set; } = string.Empty;
-    public virtual IdentityUser User { get; set; }
+    public virtual User User { get; set; }
 
-    private readonly List<UserPostLike> _likes = [];
-    public virtual IReadOnlyCollection<UserPostLike> Likes => _likes;
-    private readonly List<UserPostComment> _comments = [];
-    public virtual IReadOnlyCollection<UserPostComment> Comments => _comments;
-    private readonly List<UserPostTag> _tags = [];
-    public virtual IReadOnlyCollection<UserPostTag> Tags => _tags;
+    private readonly List<PostLike> _likes = [];
+    public virtual IReadOnlyCollection<PostLike> Likes => _likes;
+    private readonly List<PostComment> _comments = [];
+    public virtual IReadOnlyCollection<PostComment> Comments => _comments;
+    private readonly List<PostTag> _tags = [];
+    public virtual IReadOnlyCollection<PostTag> Tags => _tags;
 
     //private Post() { }
 
     public static Post Create(
         string content,
-        IdentityUser createdBy) =>
+        User by) =>
         new()
         {
             Content = content,
-            UserId = createdBy.Id,
+            UserId = by.Id,
         };
 
     public void AddLike(
-        IdentityUser likedBy)
+        User by)
     {
-        if (UserId == likedBy.Id) return; // cannot like own post
-        if (_likes.Exists(_ => _.UserId == likedBy.Id)) return; // cannot like same post more than once
+        if (UserId == by.Id) return; // cannot like own post
+        if (_likes.Exists(_ => _.UserId == by.Id)) return; // cannot like same post more than once
 
-        _likes.Add(new UserPostLike() { PostId = Id, UserId = likedBy.Id });
+        _likes.Add(new PostLike() { PostId = Id, UserId = by.Id });
         LikeCount = _likes.Count;
     }
 
-    public void RemoveLike(
-        IdentityUser likedBy)
-    {
-        var like = _likes.Find(l => l.UserId == likedBy.Id);
-        if (like is null) return;
+    //public void RemoveLike(
+    //    User by)
+    //{
+    //    var like = _likes.Find(l => l.UserId == by.Id);
+    //    if (like is null) return;
 
+    //    _likes.Remove(like);
+    //    LikeCount = _likes.Count;
+    //}
+
+    public PostLike? FindLike(string userId) =>
+        Likes.FirstOrDefault(l => l.UserId == userId);
+
+    public void RemoveLike(
+        PostLike like)
+    {
         _likes.Remove(like);
         LikeCount = _likes.Count;
     }
 
     public void AddComment(
         string comment,
-        IdentityUser commentBy)
+        User by)
     {
-        _comments.Add(new() { PostId = Id, UserId = commentBy.Id, Comment = comment });
+        _comments.Add(new() { PostId = Id, UserId = by.Id, Comment = comment });
     }
 
     public void AddTag(
-        IdentityUser user,
+        User by,
         Post post,
         string tag)
     {
-        _tags.Add(UserPostTag.Create(user, post, tag));
+        _tags.Add(PostTag.Create(by, post, tag));
     }
-}
 
-
-public class UserPostLike
-{
-    public DateTimeOffset CreatedOn { get; internal set; } = DateTimeOffset.UtcNow;
-    public string UserId { get; internal set; }
-    public IdentityUser User { get; internal set; }
-    public int PostId { get; internal set; }
-    public Post Post { get; internal set; }
-
-}
-
-public class UserPostComment
-{
-    public DateTimeOffset CreatedOn { get; internal set; } = DateTimeOffset.UtcNow;
-    public string UserId { get; internal set; }
-    public IdentityUser User { get; internal set; }
-    public int PostId { get; internal set; }
-    public Post Post { get; internal set; }
-    public string Comment { get; internal set; } = string.Empty;
-}
-
-public class UserPostTag
-{
-    public DateTimeOffset CreatedOn { get; internal set; } = DateTimeOffset.UtcNow;
-    public string UserId { get; internal set; }
-    public IdentityUser User { get; internal set; }
-    public int PostId { get; internal set; }
-    public Post Post { get; internal set; }
-    public string Tag { get; internal set; } = "misleading or false information";
-
-    internal static UserPostTag Create(
-        IdentityUser user,
-        Post post,
-        string tag
-        ) =>
-        new()
-        {
-            UserId = user.Id,
-            PostId = post.Id,
-            Tag = tag,
-        };
+    public PostLike? GetUserLike(User by) =>
+        _likes.Find(l => l.UserId == by.Id);
 }

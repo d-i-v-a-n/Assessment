@@ -1,11 +1,10 @@
 using Application;
+using Domain;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Presentation;
 using Serilog;
-using System.Security.Claims;
 
 namespace WebApi;
 
@@ -56,6 +55,24 @@ public class Program
 
         builder.Services.AddAuthorization();
 
+        builder.Services.AddTransient<IAuthenticated>(provider =>
+        {
+            var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
+
+            if (httpContextAccessor is not null
+                && httpContextAccessor.HttpContext is not null
+                && httpContextAccessor.HttpContext.User is not null
+                && httpContextAccessor.HttpContext.User.Identity is not null)
+            {
+                var authenticated = httpContextAccessor.HttpContext.User.Identity.GetUser();
+
+                if (authenticated is not null)
+                    return authenticated;
+            }
+
+            return null;//new Unauthenticated();
+        });
+
         builder.Services
             .AddApplication()
             .AddInfrastructure()
@@ -82,13 +99,7 @@ public class Program
 
         app.MapGroup("/identity").MapIdentityApi<User>();
 
-        app.MapGet("/test", () => {
-            return "Cool!";
-        });
-
-        app.MapGet("/test-auth", (ApplicationDbContext context, ClaimsPrincipal user) => {
-            return $"Hi, {user.Identity.Name}";
-        }).RequireAuthorization();
+        app.AddEndpoints();
 
         app.Run();
     }

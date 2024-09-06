@@ -1,42 +1,46 @@
-﻿namespace Persistence.Configurations;
+﻿using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-//internal sealed class PostConfiguration : IEntityTypeConfiguration<Post>
-//{
-//    public void Configure(EntityTypeBuilder<Post> builder)
-//    {
-//        builder.ToTable(nameof(Post));
-//    }
-//}
+namespace Persistence.Configurations;
 
-//internal sealed class UserPostLikeConfiguration : IEntityTypeConfiguration<UserPostLike>
-//{
-//    public void Configure(EntityTypeBuilder<UserPostLike> builder)
-//    {
-//        builder.ToTable(nameof(UserPostLike));
+internal sealed class PostConfiguration : IEntityTypeConfiguration<Post>
+{
+    public void Configure(EntityTypeBuilder<Post> builder)
+    {
+        builder.ToTable(nameof(Post));
+    }
+}
 
-//        builder.HasKey(e => new { e.UserId, e.PostId }); // user can like a post only once
-//    }
-//}
+internal sealed class UserPostLikeConfiguration : IEntityTypeConfiguration<PostLike>
+{
+    public void Configure(EntityTypeBuilder<PostLike> builder)
+    {
+        builder.ToTable(nameof(PostLike));
 
-//internal sealed class UserPostCommentConfiguration : IEntityTypeConfiguration<UserPostComment>
-//{
-//    public void Configure(EntityTypeBuilder<UserPostComment> builder)
-//    {
-//        builder.ToTable(nameof(UserPostComment));
+        builder.HasKey(e => new { e.UserId, e.PostId }); // user can like a post only once
+    }
+}
 
-//        builder.Property(e => e.Comment)
-//            .HasMaxLength(1000)
-//            .IsUnicode(false);
-//    }
-//}
+internal sealed class UserPostCommentConfiguration : IEntityTypeConfiguration<PostComment>
+{
+    public void Configure(EntityTypeBuilder<PostComment> builder)
+    {
+        builder.ToTable(nameof(PostComment));
 
-//internal sealed class UserPostTagConfiguration : IEntityTypeConfiguration<UserPostTag>
-//{
-//    public void Configure(EntityTypeBuilder<UserPostTag> builder)
-//    {
-//        builder.ToTable(nameof(UserPostTag));
+        builder.Property(e => e.Comment)
+            .HasMaxLength(1000)
+            .IsUnicode(false);
+    }
+}
 
-//        builder.Property(e => e.Tag)
-//            .HasMaxLength(100);
-//    }
-//}
+internal sealed class UserPostTagConfiguration : IEntityTypeConfiguration<PostTag>
+{
+    public void Configure(EntityTypeBuilder<PostTag> builder)
+    {
+        builder.ToTable(nameof(PostTag));
+
+        builder.Property(e => e.Tag)
+            .HasMaxLength(100);
+    }
+}
