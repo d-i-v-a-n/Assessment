@@ -80,6 +80,8 @@ public class Program
 
         app.UseAuthorization();
 
+        app.MapGroup("/identity").MapIdentityApi<User>();
+
         app.MapGet("/test", () => {
             return "Cool!";
         });
