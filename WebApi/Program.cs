@@ -1,10 +1,16 @@
 using Application;
 using Domain;
 using Domain.Entities;
+using Domain.Enums;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Presentation;
 using Serilog;
+using System.Text;
+using WebApi.Configuration;
 
 namespace WebApi;
 
@@ -44,16 +50,11 @@ public class Program
             });
         });
 
-        builder.Services.AddIdentityApiEndpoints<User>().AddEntityFrameworkStores<ApplicationDbContext>();
+        builder.Services.AddIdentity<User, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders()
+            ;//.AddDefaultUI();
 
-        //builder.Services
-        //    .AddIdentityCore<User>()
-        //    .AddApiEndpoints()
-        //    .AddEntityFrameworkStores<ApplicationDbContext>();
-        //builder.Services
-        //    .AddIdentityApiEndpoints<User>();
-
-        builder.Services.AddAuthorization();
 
         builder.Services.AddTransient<IAuthenticated>(provider =>
         {
@@ -81,23 +82,48 @@ public class Program
 
         builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            };
+        });
+
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("RequireModeratorRole", policy => policy.RequireRole(Roles.Moderator));
+        });
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
+        app.CreateUsersAndRoles().Wait();
+
         app.UseSerilogRequestLogging();
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapGroup("/identity").MapIdentityApi<User>();
+        app.MapGroup("/identity");//.MapIdentityApi<User>();
 
         app.AddEndpoints();
 

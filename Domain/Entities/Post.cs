@@ -4,7 +4,7 @@
 public class Post
 {
     public int Id { get; private set; }
-    public DateTimeOffset CreatedOn { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTime CreatedOnUtc { get; private set; } = DateTime.UtcNow;
     public string Content { get; private set; } = string.Empty;
     public int LikeCount { get; private set; } = 0;
 
@@ -35,7 +35,8 @@ public class Post
         if (UserId == by.Id) return; // cannot like own post
         if (_likes.Exists(_ => _.UserId == by.Id)) return; // cannot like same post more than once
 
-        _likes.Add(new PostLike() { PostId = Id, UserId = by.Id });
+        //_likes.Add(new PostLike() { PostId = Id, UserId = by.Id });
+        _likes.Add(PostLike.Create(by, this));
         LikeCount = _likes.Count;
     }
 
@@ -60,10 +61,11 @@ public class Post
     }
 
     public void AddComment(
-        string comment,
-        User by)
+        User by,
+        string comment)
     {
-        _comments.Add(new() { PostId = Id, UserId = by.Id, Comment = comment });
+        //_comments.Add(new() { PostId = Id, UserId = by.Id, Comment = comment });
+        _comments.Add(PostComment.Create(by, this, comment));
     }
 
     public void AddTag(
