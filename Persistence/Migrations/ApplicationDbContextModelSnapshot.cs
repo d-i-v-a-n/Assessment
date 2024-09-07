@@ -27,7 +27,7 @@ namespace Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("LikeCount")
@@ -56,7 +56,7 @@ namespace Persistence.Migrations
                         .IsUnicode(false)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("PostId")
@@ -83,7 +83,7 @@ namespace Persistence.Migrations
                     b.Property<int>("PostId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "PostId");
@@ -99,7 +99,7 @@ namespace Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("PostId")

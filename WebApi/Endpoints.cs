@@ -2,6 +2,7 @@
 using Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Persistence;
 using System.Security.Claims;
 using WebApi.Contracts;
@@ -21,9 +22,33 @@ public static class Endpoints
         }).RequireAuthorization();
 
 
-        app.MapGet("/posts", async (ISender sender, CancellationToken ct) =>
+        app.MapGet("/posts", async (
+            //[FromQuery] GetPostsRequest request, 
+            [FromQuery] int? pageNumber,
+            [FromQuery] int? pageSize,
+            [FromQuery] string? authorEmail,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] string[]? tags,
+            [FromQuery] string? sortBy,
+            ISender sender, CancellationToken ct) =>
         {
-            var result = await sender.Send(new GetPostsQuery(), ct);
+            //var result = await sender.Send(new GetPostsQuery(
+            //    PageNumber: request.PageNumber,
+            //    PageSize: request.PageSize,
+            //    AuthorEmail: request.AuthorEmail,
+            //    StartDate: request.StartDate,
+            //    EndDate: request.EndDate,
+            //    Tags: request.Tags,
+            //    SortBy: request.SortBy), ct);
+            var result = await sender.Send(new GetPostsQuery(
+                PageNumber: pageNumber ?? 1,
+                PageSize: pageSize ?? 10,
+                AuthorEmail: authorEmail,
+                StartDateUtc: startDate,
+                EndDateUtc: endDate,
+                Tags: tags,
+                SortBy: sortBy), ct);
 
             return result;
         });
@@ -41,7 +66,7 @@ public static class Endpoints
             var result = await sender.Send(command, ct);
 
             return result;
-        }).RequireAuthorization();
+        });//.RequireAuthorization();
 
         app.MapPost("/posts/{id:int}/like", async (int id, ISender sender, CancellationToken ct) =>
         {
@@ -49,7 +74,22 @@ public static class Endpoints
 
             await sender.Send(command, ct);
 
-        }).RequireAuthorization();
+        });//.RequireAuthorization();
+        app.MapPost("/posts/{id:int}/comment", async (int id, CommentOnPostRequest request, ISender sender, CancellationToken ct) =>
+        {
+            var command = new CommentOnPostCommand(PostId: id, request.Comment);
+
+            await sender.Send(command, ct);
+
+        });//.RequireAuthorization();
+
+        app.MapPost("/moderator/posts/{id:int}/tag", async (int id, ISender sender, CancellationToken ct) =>
+        {
+            var command = new TagPostCommand(PostId: id, "misleading or false information");
+
+            await sender.Send(command, ct);
+
+        });//.RequireAuthorization();
 
         app.MapDelete("/posts/{id:int}/like", async (int id, ISender sender, CancellationToken ct) =>
         {
@@ -57,6 +97,6 @@ public static class Endpoints
 
             await sender.Send(command, ct);
 
-        }).RequireAuthorization();
+        });//.RequireAuthorization();
     }
 }

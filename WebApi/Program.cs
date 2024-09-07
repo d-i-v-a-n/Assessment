@@ -1,11 +1,14 @@
 using Application;
 using Domain;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Presentation;
 using Serilog;
+using System.Text;
 using WebApi.Configuration;
 
 namespace WebApi;
@@ -46,25 +49,10 @@ public class Program
             });
         });
 
-
-
-        //builder.Services
-        //    .AddIdentity<User, IdentityRole>()
-        //    .AddDefaultTokenProviders()
-        //    .AddDefaultUI()
-        //    .AddRoles<IdentityRole>()
-        //    .AddEntityFrameworkStores<ApplicationDbContext>();
-
-        //builder.Services.AddIdentity<User, IdentityRole>().AddRoles<IdentityRole>();
-
-        //builder.Services.AddDefaultIdentity<User>().AddRoles<IdentityRole>();
-
-        builder.Services
-            .AddIdentityApiEndpoints<User>()
-            //.AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
-
-
+        builder.Services.AddIdentity<User, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders()
+            .AddDefaultUI();
 
 
         builder.Services.AddTransient<IAuthenticated>(provider =>
@@ -95,10 +83,35 @@ public class Program
 
         builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
-        builder.Services
-            .AddAuthorization()
-            .AddAuthentication();
+        //builder.Services
+        //    .AddAuthentication("Identity.Bearer")
+        //    .AddCookie("Identity.Bearer", options =>
+        //    {
+        //        options.Cookie.Name = "bearer";
+        //    });
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = "TheIssuer",
+                ValidAudience = "TheAudience",
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TheSuperSecretKey"))
+            };
+        });
 
+        builder.Services
+            .AddAuthorization();
+            
         var app = builder.Build();
 
         
@@ -116,6 +129,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapGroup("/identity").MapIdentityApi<User>();

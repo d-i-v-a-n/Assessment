@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Various_new_tables : Migration
+    public partial class Entity_tables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    CreatedOnUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Content = table.Column<string>(type: "TEXT", nullable: false),
                     LikeCount = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: false)
@@ -39,7 +39,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    CreatedOnUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: false),
                     PostId = table.Column<int>(type: "INTEGER", nullable: false),
                     Comment = table.Column<string>(type: "TEXT", unicode: false, maxLength: 1000, nullable: false)
@@ -67,7 +67,7 @@ namespace Persistence.Migrations
                 {
                     UserId = table.Column<string>(type: "TEXT", nullable: false),
                     PostId = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
+                    CreatedOnUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -92,7 +92,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    CreatedOnUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: false),
                     PostId = table.Column<int>(type: "INTEGER", nullable: false),
                     Tag = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)

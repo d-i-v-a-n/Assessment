@@ -1,11 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.Repositories;
 
@@ -36,6 +31,46 @@ public sealed class PostRepository : IPostRepository
             .Include(_ => _.User)
             .Include(_ => _.Likes)
             .ToListAsync(cancellationToken: ct);
+    }
+
+    public async Task<IEnumerable<Post>> GetPagedPostsAsync(
+        int pageNumber,
+        int pageSize,
+        string? authorEmail,
+        DateTime? startDate,
+        DateTime? endDate,
+        string[]? tags,
+        string? sortBy)
+    {
+        var query = _context.Set<Post>()
+            .AsNoTracking()
+            .Include(p => p.Comments).ThenInclude(c => c.User)
+            .Include(p => p.User)
+            .Include(p => p.Tags)
+            .AsQueryable();
+
+        // Apply filters
+        if (!string.IsNullOrEmpty(authorEmail))
+            query = query.Where(p => p.User.Email == authorEmail);
+
+        if (startDate.HasValue && endDate.HasValue)
+            query = query.Where(p => p.CreatedOnUtc >= startDate.Value && p.CreatedOnUtc <= endDate.Value);
+
+        if (tags != null && tags.Any())
+            query = query.Where(p => p.Tags.Any(t => tags.Contains(t.Tag)));
+
+        // Apply sorting
+        query = sortBy == "likes"
+            ? query.OrderByDescending(p => p.LikeCount)
+            : query.OrderByDescending(p => p.CreatedOnUtc);
+
+        // Apply pagination
+        var pagedPosts = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return pagedPosts;
     }
 }
 
