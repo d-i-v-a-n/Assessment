@@ -16,3 +16,8 @@ The entry point of the app is WebApi.
 Please run in Debug mode (it was the only one tested and has swagger).
 
 The Login request in postman will set the auth token up for all other authed requests.
+
+Github: https://github.com/d-i-v-a-n/Assessment
+Postman workspace: https://www.postman.com/payload-cosmologist-23008396/workspace/divan-s-assessment-workspace
+
+PS. If I had more time I would have liked to add more features like validation and auto mapping.
