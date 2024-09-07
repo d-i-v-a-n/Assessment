@@ -22,20 +22,16 @@ public static class UserConfiguration
             {
                 var roleExist = await RoleManager.RoleExistsAsync(roleName);
                 if (!roleExist)
-                {
-                    //create the roles and seed them to the database: Question 1
                     roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
-                }
             }
 
-            //Here you could create a super user who will maintain the web app
             var moderator = new User
             {
-                UserName = "moderator@thisapp.co.za", //Configuration["AppSettings:UserName"],
+                UserName = "moderator@thisapp.co.za",
                 Email = "moderator@thisapp.co.za",
             };
-            //Ensure you have these values in your appsettings.json file
-            string userPWD = "P@ssw0rd";//Configuration["AppSettings:UserPassword"];
+            
+            string userPWD = "P@ssw0rd";
             var _user = await UserManager.FindByEmailAsync(moderator.Email);
 
             if (_user == null)
@@ -43,9 +39,7 @@ public static class UserConfiguration
                 var createPowerUser = await UserManager.CreateAsync(moderator, userPWD);
                 if (createPowerUser.Succeeded)
                 {
-                    //here we tie the new user to the role
                     await UserManager.AddToRoleAsync(moderator, Roles.Moderator);
-
                 }
             }
         }
