@@ -25,7 +25,7 @@ public sealed class GetPostsQueryHandler : IRequestHandler<GetPostsQuery, PagedP
 
     public async Task<PagedPostsDto> Handle(GetPostsQuery request, CancellationToken cancellationToken)
     {
-        var posts = await _repository.GetPagedPostsAsync(
+        (IEnumerable<Domain.Entities.Post> posts, int totalCount) = await _repository.GetPagedPostsAsync(
             request.PageNumber,
             request.PageSize,
             request.AuthorEmail,
@@ -55,6 +55,6 @@ public sealed class GetPostsQueryHandler : IRequestHandler<GetPostsQuery, PagedP
             }).ToList()
         }).ToList();
 
-        return new PagedPostsDto(postDtos, posts.Count(), request.PageNumber, request.PageSize);
+        return new PagedPostsDto(postDtos, totalCount, request.PageNumber, request.PageSize);
     }
 }

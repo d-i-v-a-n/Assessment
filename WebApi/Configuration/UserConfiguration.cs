@@ -14,12 +14,8 @@ public static class UserConfiguration
         {
             var RoleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            //public static async Task CreateUsersAndRoles(this IServiceProvider serviceProvider)
-            //{
-            //initializing custom roles 
-            //var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var UserManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-            string[] roleNames = [$"{Roles.Member}", $"{Roles.Moderator}"];
+            string[] roleNames = [Roles.Member, Roles.Moderator];
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)
@@ -48,7 +44,7 @@ public static class UserConfiguration
                 if (createPowerUser.Succeeded)
                 {
                     //here we tie the new user to the role
-                    await UserManager.AddToRoleAsync(moderator, $"{Roles.Moderator}");
+                    await UserManager.AddToRoleAsync(moderator, Roles.Moderator);
 
                 }
             }

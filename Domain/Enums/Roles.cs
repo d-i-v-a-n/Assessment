@@ -1,7 +1,13 @@
 ﻿namespace Domain.Enums;
 
-public enum Roles
+public static class Roles
 {
-    Member,
-    Moderator
+    public const string Member = "Member";
+    public const string Moderator = "Moderator";
 }
+
+//public enum Roles
+//{
+//    Member,
+//    Moderator
+//}

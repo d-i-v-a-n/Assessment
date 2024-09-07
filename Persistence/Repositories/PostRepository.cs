@@ -33,14 +33,14 @@ public sealed class PostRepository : IPostRepository
             .ToListAsync(cancellationToken: ct);
     }
 
-    public async Task<IEnumerable<Post>> GetPagedPostsAsync(
-        int pageNumber,
-        int pageSize,
-        string? authorEmail,
-        DateTime? startDate,
-        DateTime? endDate,
-        string[]? tags,
-        string? sortBy)
+    public async Task<(IEnumerable<Post> Posts, int TotalCount)> GetPagedPostsAsync(
+    int pageNumber,
+    int pageSize,
+    string? authorEmail,
+    DateTime? startDate,
+    DateTime? endDate,
+    string[]? tags,
+    string? sortBy)
     {
         var query = _context.Set<Post>()
             .AsNoTracking()
@@ -53,11 +53,17 @@ public sealed class PostRepository : IPostRepository
         if (!string.IsNullOrEmpty(authorEmail))
             query = query.Where(p => p.User.Email == authorEmail);
 
-        if (startDate.HasValue && endDate.HasValue)
-            query = query.Where(p => p.CreatedOnUtc >= startDate.Value && p.CreatedOnUtc <= endDate.Value);
+        if (startDate.HasValue)
+            query = query.Where(p => p.CreatedOnUtc >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(p => p.CreatedOnUtc <= endDate.Value);
 
         if (tags != null && tags.Any())
             query = query.Where(p => p.Tags.Any(t => tags.Contains(t.Tag)));
+
+        // Get total count before pagination
+        var totalCount = await query.CountAsync();
 
         // Apply sorting
         query = sortBy == "likes"
@@ -70,7 +76,7 @@ public sealed class PostRepository : IPostRepository
             .Take(pageSize)
             .ToListAsync();
 
-        return pagedPosts;
+        return (pagedPosts, totalCount);
     }
 }
 

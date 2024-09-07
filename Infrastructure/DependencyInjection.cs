@@ -26,7 +26,7 @@ public static class Extensions
 
         return new AuthenticatedUser(
             id: claimsIdentity.GetValue(ClaimTypes.NameIdentifier),
-            email: claimsIdentity.GetValue(ClaimTypes.Name),
+            email: claimsIdentity.GetValue(ClaimTypes.Email),
             isAuthenticated: true,
             isModerator: false
             );

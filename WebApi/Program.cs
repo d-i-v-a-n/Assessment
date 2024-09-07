@@ -1,6 +1,7 @@
 using Application;
 using Domain;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -52,7 +53,7 @@ public class Program
         builder.Services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders()
-            .AddDefaultUI();
+            ;//.AddDefaultUI();
 
 
         builder.Services.AddTransient<IAuthenticated>(provider =>
@@ -79,21 +80,12 @@ public class Program
             .AddPersistence()
             .AddPresentation();
 
-        
-
         builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
-        //builder.Services
-        //    .AddAuthentication("Identity.Bearer")
-        //    .AddCookie("Identity.Bearer", options =>
-        //    {
-        //        options.Cookie.Name = "bearer";
-        //    });
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
         })
         .AddJwtBearer(options =>
         {
@@ -103,20 +95,19 @@ public class Program
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = "TheIssuer",
-                ValidAudience = "TheAudience",
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TheSuperSecretKey"))
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
             };
         });
 
-        builder.Services
-            .AddAuthorization();
-            
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("RequireModeratorRole", policy => policy.RequireRole(Roles.Moderator));
+        });
+
         var app = builder.Build();
 
-        
-
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -132,7 +123,7 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapGroup("/identity").MapIdentityApi<User>();
+        app.MapGroup("/identity");//.MapIdentityApi<User>();
 
         app.AddEndpoints();
 

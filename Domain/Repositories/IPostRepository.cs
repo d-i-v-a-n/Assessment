@@ -8,7 +8,7 @@ public interface IPostRepository
     void Update(Post post);
     Task<List<Post>> GetPostsAsync(CancellationToken ct = default);
     Task<Post> GetPostByIdAsync(int id, CancellationToken ct = default);
-    Task<IEnumerable<Post>> GetPagedPostsAsync(
+    Task<(IEnumerable<Post> Posts, int TotalCount)> GetPagedPostsAsync(
         int pageNumber,
         int pageSize,
         string? authorEmail,
