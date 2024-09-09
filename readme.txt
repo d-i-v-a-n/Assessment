@@ -1,11 +1,11 @@
 Hi!
 
-The Database is already seeded some dev test data. I haven't implemented auto create of the database due to time.
+The Database is already seeded with some dev test data. I haven't implemented auto create of the database due to time.
 Moderator account: 
 	moderator@thisapp.co.za
-	P@ssword
+	P@ssw0rd
 
-Normal user accounts (they all use the same password "P@ssword"):
+Normal user accounts (they all use the same password "P@ssw0rd"):
 	divanjbrt@gmail.com
 	normal.user.1@thisapp.co.za
 	test@test.co.za
