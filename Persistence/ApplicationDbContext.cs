@@ -7,7 +7,7 @@ namespace Persistence;
 public class ApplicationDbContext : IdentityDbContext<User>
 {
     protected override void OnConfiguring(DbContextOptionsBuilder options) =>
-        options.UseSqlite("DataSource = Database; Cache=Shared");
+        options.UseSqlite("DataSource = Database.db; Cache=Shared");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

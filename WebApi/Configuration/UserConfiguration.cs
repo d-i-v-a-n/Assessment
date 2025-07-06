@@ -10,37 +10,35 @@ public static class UserConfiguration
     {
         var serviceProvider = app.ApplicationServices.GetService<IServiceProvider>();
 
-        using (var scope = serviceProvider.CreateScope())
+        using var scope = serviceProvider!.CreateScope();
+        var RoleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        var UserManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        string[] roleNames = [Roles.Member, Roles.Moderator];
+        IdentityResult roleResult;
+
+        foreach (var roleName in roleNames)
         {
-            var RoleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var roleExist = await RoleManager.RoleExistsAsync(roleName);
+            if (!roleExist)
+                roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
+        }
 
-            var UserManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-            string[] roleNames = [Roles.Member, Roles.Moderator];
-            IdentityResult roleResult;
+        var moderator = new User
+        {
+            UserName = "moderator@thisapp.co.za",
+            Email = "moderator@thisapp.co.za",
+        };
 
-            foreach (var roleName in roleNames)
+        string userPWD = "P@ssw0rd";
+        var _user = await UserManager.FindByEmailAsync(moderator.Email);
+
+        if (_user == null)
+        {
+            var createPowerUser = await UserManager.CreateAsync(moderator, userPWD);
+            if (createPowerUser.Succeeded)
             {
-                var roleExist = await RoleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                    roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
-            }
-
-            var moderator = new User
-            {
-                UserName = "moderator@thisapp.co.za",
-                Email = "moderator@thisapp.co.za",
-            };
-            
-            string userPWD = "P@ssw0rd";
-            var _user = await UserManager.FindByEmailAsync(moderator.Email);
-
-            if (_user == null)
-            {
-                var createPowerUser = await UserManager.CreateAsync(moderator, userPWD);
-                if (createPowerUser.Succeeded)
-                {
-                    await UserManager.AddToRoleAsync(moderator, Roles.Moderator);
-                }
+                await UserManager.AddToRoleAsync(moderator, Roles.Moderator);
             }
         }
     }

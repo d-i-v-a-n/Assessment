@@ -9,7 +9,7 @@ public class Post
     public int LikeCount { get; private set; } = 0;
 
     public string UserId { get; private set; } = string.Empty;
-    public virtual User User { get; set; }
+    public virtual User User { get; set; } = null!;
 
     private readonly List<PostLike> _likes = [];
     public virtual IReadOnlyCollection<PostLike> Likes => _likes;
@@ -35,20 +35,9 @@ public class Post
         if (UserId == by.Id) return; // cannot like own post
         if (_likes.Exists(_ => _.UserId == by.Id)) return; // cannot like same post more than once
 
-        //_likes.Add(new PostLike() { PostId = Id, UserId = by.Id });
         _likes.Add(PostLike.Create(by, this));
         LikeCount = _likes.Count;
     }
-
-    //public void RemoveLike(
-    //    User by)
-    //{
-    //    var like = _likes.Find(l => l.UserId == by.Id);
-    //    if (like is null) return;
-
-    //    _likes.Remove(like);
-    //    LikeCount = _likes.Count;
-    //}
 
     public PostLike? FindLike(string userId) =>
         Likes.FirstOrDefault(l => l.UserId == userId);
@@ -64,7 +53,6 @@ public class Post
         User by,
         string comment)
     {
-        //_comments.Add(new() { PostId = Id, UserId = by.Id, Comment = comment });
         _comments.Add(PostComment.Create(by, this, comment));
     }
 
