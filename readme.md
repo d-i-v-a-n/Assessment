@@ -1,19 +1,19 @@
 Hi there!
 
-_(Please first read the [Assessment Instructions](#assessment-instructions) below.)_
+Please first read the [Assessment Instructions](#assessment-instructions), below, and then continue with the [Instructions to run the project](#instructions-to-run-the-project).
 
 ### Instructions to run the project:<br/>
 The entry point of the app is WebApi.<br/>
 Please run in Debug mode (it was the only one tested and has swagger).
 
 The Database is already seeded with some dev test data. I haven't implemented auto create of the database due to time.<br/>
-Moderator account: ```moderator@thisapp.co.za | P@ssw0rd```<br/>
-Normal user accounts (they all use the same password "P@ssw0rd"):
-```divanjbrt@gmail.com```
-```normal.user.1@thisapp.co.za```
+Moderator account: ```moderator@thisapp.co.za```<br/>
+Normal user accounts: 
 ```test@test.co.za```
 ```test1@test.co.za```
 ```normal.user.2@thisapp.co.za```
+```normal.user.1@thisapp.co.za```<br/>
+All accounts use the password: ```P@ssw0rd```
 
 The Login request in postman will set the auth token up for all other authed requests.<br/>
 Postman workspace: https://www.postman.com/payload-cosmologist-23008396/workspace/divan-s-assessment-workspace
